@@ -1,33 +1,42 @@
 <?php
-class App {
-    protected $controller = 'Login';
-    protected $method = 'index';
-    protected $params = [];
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-    public function __construct() {
-        $url = $this->parseUrl();
+require_once 'app/controllers/AuthController.php'; // Adjust path
+require_once 'app/controllers/UserController.php';
 
-        if (file_exists('../app/controllers/' . ucfirst($url[0]) . '.php')) {
-            $this->controller = ucfirst($url[0]);
-            unset($url[0]);
+$page = isset($_GET['page']) ? $_GET['page'] : 'login';
+$authController = new AuthController();
+$userController = new UserController();
+
+switch ($page) {
+    case 'login':
+        $authController->login();
+        break;
+    case 'register':
+        $authController->register();
+        break;
+    case 'logout':
+        $authController->logout();
+        break;
+    case 'users':
+        session_start();
+        if (!isset($_SESSION['u_id']) || $_SESSION['role'] !== 'admin') {
+            header("Location: index.php?page=login");
+            exit;
         }
-
-        require_once '../app/controllers/' . $this->controller . '.php';
-        $this->controller = new $this->controller;
-
-        if (isset($url[1]) && method_exists($this->controller, $url[1])) {
-            $this->method = $url[1];
-            unset($url[1]);
+        $userController->list();
+        break;
+    case 'edit_user':
+        session_start();
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header("Location: index.php?page=login");
+            exit;
         }
-
-        $this->params = $url ? array_values($url) : [];
-        call_user_func_array([$this->controller, $this->method], $this->params);
-    }
-
-    private function parseUrl() {
-        if (isset($_GET['url'])) {
-            return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
-        }
-        return ['Login'];
-    }
+        $userController->edit();
+        break;
+    default:
+        $authController->login();
 }
+?>
