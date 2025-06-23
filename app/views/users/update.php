@@ -7,7 +7,7 @@
         </p>
     <?php endif; ?>
     <form method="POST" action="index.php?page=update_user&id=<?php echo $user['id']; ?>">
-        <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+        <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
         <div>
             <label>Name</label>
             <input type="text" name="name" value="<?php echo $user['name']; ?>" required>

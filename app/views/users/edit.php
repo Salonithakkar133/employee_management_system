@@ -1,4 +1,4 @@
-<
+
 <?php include 'app/views/template/header.php'; ?>
 <div class="container">
     <h2>Assign User Role</h2>

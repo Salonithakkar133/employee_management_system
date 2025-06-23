@@ -1,3 +1,6 @@
+<?php
+$currentPage = $_GET['page'] ?? '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +10,7 @@
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <?php session_start(); ?>
+
 <header>
     <nav>
         <h1>Employee Management System</h1>
@@ -21,13 +24,17 @@
                         <li><a href="index.php?page=add_user">Add User</a></li>
                     <?php endif; ?>
                 <?php endif; ?>
+                <li><a href="index.php?page=profile">Profile</a></li>
                 <li><a href="index.php?page=logout">Logout</a></li>
             <?php else: ?>
-                <li><a href="index.php?page=login">Login</a></li>
-                <li><a href="index.php?page=register">Register</a></li>
+                <?php if ($currentPage !== 'login'): ?>
+                    <li><a href="index.php?page=login">Login</a></li>
+                <?php endif; ?>
+                <?php if ($currentPage !== 'register'): ?>
+                    <li><a href="index.php?page=register">Register</a></li>
+                <?php endif; ?>
             <?php endif; ?>
         </ul>
     </nav>
 </header>
-    </header>
-    <div class="container">
+<div class="container">

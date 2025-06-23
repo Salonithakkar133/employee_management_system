@@ -1,16 +1,17 @@
 <?php
+include("config/database.php");
 class User {
     private $conn;
     private $table_name = "users";
-
     public $id;
     public $name;
     public $email;
     public $password;
     public $role;
-
-    public function __construct($db) {
-        $this->conn = $db;
+    public function __construct() {
+      $db=new Database();  
+        $this->conn =$db->getConnection();
+        
     }
 
     public function register() {
@@ -46,13 +47,12 @@ class User {
     }
 
     public function getAllUsers() {
-        $query = "SELECT id, name, email, role FROM " . $this->table_name;
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt;
-    }
-
-    public function getUserById($id) {
+    $query = "SELECT * FROM users";
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute();
+    return $stmt;
+}    
+public function getUserById($id) {
         $query = "SELECT id, name, email, role FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);
@@ -118,12 +118,22 @@ class User {
         }
     }
 
-    public function delete($id) {
-        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $id);
-        return $stmt->execute();
-    }
+    public function softDelete($id) {
+    $query = "UPDATE users SET is_deleted = 1 WHERE id = :id";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+
+
+
+// For team_leader: return only non-deleted users
+public function getAllActiveUsers() {
+    $query = "SELECT * FROM users WHERE is_deleted = 0";
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute();
+    return $stmt;
+}
 
     public function updateRole($id, $role) {
         $query = "UPDATE " . $this->table_name . " SET role = :role WHERE id = :id";
@@ -132,5 +142,22 @@ class User {
         $stmt->bindParam(":id", $id);
         return $stmt->execute();
     }
+
+public function updateProfile($id, $name, $email) {
+    $query = "UPDATE users SET name = :name, email = :email WHERE id = :id";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(":name", $name);
+    $stmt->bindParam(":email", $email);
+    $stmt->bindParam(":id", $id);
+    return $stmt->execute();
+}
+
+    public function restoreUser($id) {
+    $query = "UPDATE users SET is_deleted = 0 WHERE id = :id";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+
 }
 ?>

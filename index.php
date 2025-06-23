@@ -1,4 +1,5 @@
 <?php
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -33,11 +34,11 @@ switch ($page) {
             exit;
         }
         $role = $_SESSION['role'];
-        include_once "views/dashboard/$role.php";
+        include_once "app/views/dashboard/$role.php";
         break;
     case 'users':
         session_start();
-        if (!isset($_SESSION['id']) || !in_array($_SESSION['role'], ['admin', 'team_leader'])) {
+        if (!isset($_SESSION['id']) || !in_array($_SESSION['role'], ['admin', 'team_leader','employee'])) {
             header("Location: index.php?page=login");
             exit;
         }
@@ -57,7 +58,7 @@ switch ($page) {
         break;
     case 'update_user':
         session_start();
-        if (!isset($_SESSION['id']) || !in_array($_SESSION['role'], ['admin', 'team_leader'])) {
+        if (!isset($_SESSION['id']) || !in_array($_SESSION['role'], ['admin', 'team_leader','employee'])) {
             header("Location: index.php?page=login");
             exit;
         }
@@ -77,6 +78,35 @@ switch ($page) {
         elseif ($page === 'edit_task') $taskController->edit();
         elseif ($page === 'delete_task') $taskController->delete();
         break;
+     case 'profile':
+    session_start();
+    if (!isset($_SESSION['id'])) {
+        header("Location: index.php?page=login");
+        exit;
+    }
+
+    $user_id = $_SESSION['id'];
+    $user = $userController->getProfileData($user_id);  // ⬅️ fetch user data
+    include_once 'app/views/users/profile.php'; // ⬅️ render profile view
+    break;
+
+    case 'update_profile':
+        session_start();
+        if (!isset($_SESSION['id'])) {
+            header("Location: index.php?page=login");
+            exit;
+        }
+        $userController->update_profile();
+        break;
+        case 'restore_user':
+    session_start();
+    if (!isset($_SESSION['id']) || $_SESSION['role'] !== 'admin') {
+        header("Location: index.php?page=login");
+        exit;
+    }
+    $userController->restore();
+    break;
+
    
     default:
         $authController->login();

@@ -27,7 +27,7 @@ class AuthController {
                         error_log("Login failed: Pending role");
                     } else {
                         session_start();
-                        $_SESSION['user_id'] = $user['id'];
+                        $_SESSION['id'] = $user['id'];
                         $_SESSION['role'] = $user['role'];
                         error_log("Login successful: User ID = " . $user['id'] . ", Role = " . $user['role']);
                         header("Location: index.php?page=dashboard");
@@ -46,11 +46,37 @@ class AuthController {
             error_log("No POST request");
         }
         error_log("Rendering login page with error: $error");
-        include_once 'views/auth/login.php';
+        include_once 'app/views/auth/login.php';
     }
 
     public function register() {
-        // ... (unchanged, assuming provided code)
+        $error = '';
+        error_log("Entering register method");
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            error_log("POST data: " . print_r($_POST, true));
+            $this->user->name = trim($_POST['name']);
+            $this->user->email = trim($_POST['email']);
+            $this->user->password = password_hash(trim($_POST['password']), PASSWORD_DEFAULT);
+            $this->user->role = 'pending'; 
+            try {
+                if ($this->user->register()) {
+                    error_log("Registration successful: Email = " . $this->user->email);
+                     $message = "Registration successful. Please contact admin to assign a role.";
+                    include_once 'app/views/auth/registration.php';
+                    return;
+                    
+                    } 
+                     else {
+                    $error = "Registration failed. Email may already exist.";
+                    error_log("Registration failed: Email = " . $this->user->email);
+                }
+            } catch (Exception $e) {
+                $error = "Error: " . $e->getMessage();
+                error_log("Registration error: " . $e->getMessage());
+            }
+        }
+        error_log("Rendering register page with error: $error");
+        include_once 'app/views/auth/registration.php';
     }
 
     public function logout() {

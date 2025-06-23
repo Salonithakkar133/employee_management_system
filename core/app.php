@@ -30,7 +30,7 @@ switch ($page) {
         break;
     case 'edit_user':
         session_start();
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+        if (!isset($_SESSION['u_id']) || $_SESSION['role'] !== 'admin') {
             header("Location: index.php?page=login");
             exit;
         }

@@ -12,13 +12,17 @@ class UserController {
     }
 
     public function list() {
-        session_start();
-        $users = $this->user->getAllUsers();
-        include_once 'views/users/list.php';
+    $role = $_SESSION['role'];
+    if ($role === 'admin') {
+        $users = $this->user->getAllUsers(); // includes soft-deleted
+    } else {
+        $users = $this->user->getAllActiveUsers(); // excludes soft-deleted
     }
 
+    include 'app/views/users/list.php';
+}
+
     public function add() {
-        session_start();
         $message = '';
         if ($_POST) {
             $this->user->name = $_POST['name'];
@@ -35,11 +39,10 @@ class UserController {
                 $message = "Failed to add user.";
             }
         }
-        include_once 'views/users/add.php';
+        include_once 'app/views/users/add.php';
     }
 
     public function edit() {
-        session_start();
         $message = '';
         $user_id = isset($_GET['id']) ? $_GET['id'] : null;
         $user = $this->user->getUserById($user_id);
@@ -47,17 +50,23 @@ class UserController {
         if ($_POST) {
             $this->user->id = $_POST['user_id'];
             $this->user->role = $_POST['role'];
-            if ($this->user->updateRole($this->user->id, $this->user->role)) {
-                $message = "Role updated successfully.";
+
+            // Restrict team_leader from assigning admin role
+            if ($_SESSION['role'] === 'team_leader' && $_POST['role'] === 'admin') {
+                $message = "Team Leader cannot assign Admin role.";
             } else {
-                $message = "Failed to update role.";
+                if ($this->user->updateRole($this->user->id, $this->user->role)) {
+                    $message = "Role updated successfully.";
+                } else {
+                    $message = "Failed to update role.";
+                }
             }
         }
-        include_once 'views/users/edit.php';
+
+        include_once 'app/views/users/edit.php';
     }
 
     public function update() {
-        session_start();
         $message = '';
         $user_id = isset($_GET['id']) ? $_GET['id'] : null;
         $user = $this->user->getUserById($user_id);
@@ -78,18 +87,95 @@ class UserController {
                 $message = "Failed to update user.";
             }
         }
-        include_once 'views/users/update.php';
+        include_once 'app/views/users/update.php';
+    }
+    public function profile() {
+    session_start();
+    $user_id = $_SESSION['id'];
+    $message = '';
+
+    $user = $this->user->getUserById($user_id);
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $name = trim($_POST['name']);
+        $email = trim($_POST['email']);
+
+        if ($this->user->updateProfile($user_id, $name, $email)) {
+            $message = "Profile updated successfully.";
+            $user = $this->user->getUserById($user_id); // Refresh data
+        } else {
+            $message = "Failed to update profile.";
+        }
     }
 
+    include_once 'app/views/users/profile.php';
+}
+
+
+
     public function delete() {
-        session_start();
+      
         $user_id = isset($_GET['id']) ? $_GET['id'] : null;
-        if ($this->user->delete($user_id)) {
+        if ($this->user->softdelete($user_id)) {
             header("Location: index.php?page=users&message=User deleted successfully");
         } else {
             header("Location: index.php?page=users&message=Failed to delete user");
         }
         exit;
     }
+
+    
+    public function update_profile() {
+    session_start();
+    $user_id = $_SESSION['id'];
+    $message = '';
+
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $image_name = null;
+
+    if (!empty($_FILES['profile_image']['name'])) {
+        $target_dir = "uploads/";
+        $image_name = time() . '_' . basename($_FILES["profile_image"]["name"]);
+        $target_file = $target_dir . $image_name;
+
+        move_uploaded_file($_FILES["profile_image"]["tmp_name"], $target_file);
+    }
+
+    // Update DB
+    $query = "UPDATE users SET name = :name, email = :email" . ($image_name ? ", profile_image = :image" : "") . " WHERE id = :id";
+    $stmt = $this->db->prepare($query);
+    $stmt->bindParam(":name", $name);
+    $stmt->bindParam(":email", $email);
+    if ($image_name) $stmt->bindParam(":image", $image_name);
+    $stmt->bindParam(":id", $user_id);
+
+    if ($stmt->execute()) {
+        header("Location: index.php?page=profile&message=Profile updated successfully");
+    } else {
+        header("Location: index.php?page=profile&message=Failed to update profile");
+    }
+    exit;
 }
+public function getProfileData($user_id) {
+    $stmt = $this->db->prepare("SELECT * FROM users WHERE id = :id");
+    $stmt->bindParam(":id", $user_id);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+public function restore() {
+    $id = $_GET['id'];
+
+    if ($this->user->restoreUser($id)) {
+        header("Location: index.php?page=users&message=User+restored+successfully");
+    } else {
+        header("Location: index.php?page=users&message=Failed+to+restore+user");
+    }
+}
+
+}
+
+
+
+
 ?>

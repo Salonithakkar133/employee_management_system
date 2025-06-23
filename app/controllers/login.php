@@ -2,20 +2,20 @@
 session_start();
 class Login extends Controller {
     public function index() {
-        $this->view('auth/login');
+        $this->view('app/auth/login');
     }
 
     public function register() {
-        $this->view('auth/registration');
+        $this->view('app/auth/registration');
     }
 
     public function createUser() {
-        require '../config/db.php';
+        require '../config/database.php';
         $first = $_POST['first_name'];
         $last = $_POST['last_name'];
         $email = $_POST['email'];
         $pass = $_POST['password'];
-        $confirm = $_POST['confirm_password'];
+        //$confirm = $_POST['confirm_password'];
 
         if ($pass !== $confirm) {
             $_SESSION['error'] = "Passwords do not match.";
@@ -37,7 +37,7 @@ class Login extends Controller {
     }
 
     public function auth() {
-        require '../config/db.php';
+        require '../config/database.php';
         $email = $_POST['email'];
         $pass = $_POST['password'];
 

@@ -15,15 +15,15 @@ class TaskController {
     }
 
     public function list() {
-        session_start();
+        
         $user_id = $_SESSION['id'];
         $role = $_SESSION['role'];
         $tasks = $this->task->readByUser($user_id, $role);
-        include_once 'views/tasks/list.php';
+        include_once 'app/views/tasks/list.php';
     }
 
     public function add() {
-        session_start();
+       
         $message = '';
         if ($_POST) {
             $this->task->title = $_POST['title'];
@@ -40,31 +40,56 @@ class TaskController {
             }
         }
         $users = $this->user->getAllUsers();
-        include_once 'views/tasks/add.php';
+        include_once 'app/views/tasks/add.php';
     }
 
     public function edit() {
-        session_start();
+       
         $message = '';
         $task_id = isset($_GET['id']) ? $_GET['id'] : null;
         $task = $this->task->getTaskById($task_id);
+        $role = $_SESSION['role'];
+        $user_id = $_SESSION['id'];
+
+        // If employee, only allow editing if assigned to them
+        if ($role === 'employee' && $task['assigned_to'] != $user_id) {
+            die("Unauthorized access.");
+        }
 
         if ($_POST) {
             $this->task->id = $_POST['task_id'];
-            $this->task->title = $_POST['title'];
-            $this->task->description = $_POST['description'];
-            $this->task->status = $_POST['status'];
-            $this->task->assigned_to = !empty($_POST['assigned_to']) ? $_POST['assigned_to'] : null;
 
-            if ($this->task->update()) {
-                $message = "Task updated successfully.";
+            if ($role === 'employee') {
+                // Employee can only update status
+                $this->task->status = $_POST['status'];
+                 $this->task->assigned_to = $user_id;
+                if ($this->task->updateStatusOnly()) {
+                    $message = "Status updated successfully.";
+                } else {
+                    $message = "Failed to update status.";
+                }
             } else {
-                $message = "Failed to update task.";
+                // Admin or Team Leader can update all fields
+                $this->task->title = $_POST['title'];
+                $this->task->description = $_POST['description'];
+                $this->task->status = $_POST['status'];
+                $this->task->assigned_to = !empty($_POST['assigned_to']) ? $_POST['assigned_to'] : null;
+
+                if ($this->task->update()) {
+                    $message = "Task updated successfully.";
+                } else {
+                    $message = "Failed to update task.";
+                }
             }
         }
+
         $users = $this->user->getAllUsers();
-        include_once 'views/tasks/edit.php';
+        include_once 'app/views/tasks/edit.php';
     }
+
+    // For employee status-only update
+
+
 
     public function delete() {
         session_start();

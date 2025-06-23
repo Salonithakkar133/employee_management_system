@@ -1,4 +1,4 @@
-<?php include 'add/views/template/header.php'; ?>
+<?php include 'app/views/template/header.php'; ?>
 <div class="container">
     <h2>Add Task</h2>
     <?php if (!empty($message)): ?>
@@ -34,4 +34,4 @@
     </form>
     <p><a href="index.php?page=tasks">Back to Tasks</a></p>
 </div>
-<?php include 'add/views/template/footer.php'; ?>
+<?php include 'app/views/template/footer.php'; ?>
