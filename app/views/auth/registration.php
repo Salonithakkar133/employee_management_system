@@ -2,10 +2,16 @@
 <div class="container">
     <h2>Register</h2>
 
-    <?php if (!empty($message)): ?>
-        <p class="<?php echo (strpos($message, 'failed') !== false || strpos($message, 'already') !== false) ? 'error' : 'message'; ?>" style="color:<?php echo (strpos($message, 'failed') !== false || strpos($message, 'already') !== false) ? 'red' : 'green'; ?>;">
+    <?php if (!empty($error)): ?>
+        <p class="error" style="color: red;">
+            <?php echo htmlspecialchars($error); ?>
+        </p>
+    <?php elseif (!empty($message)): ?>
+        <p class="message" style="color: green;">
             <?php echo htmlspecialchars($message); ?>
         </p>
+    <?php else: ?>
+        <p>Please fill out the form to register.</p>
     <?php endif; ?>
 
     <form method="POST" onsubmit="return validatePassword()" action="index.php?page=register">
@@ -20,7 +26,7 @@
         <div>
             <label>Password</label>
             <input type="password" name="password" id="password" required>
-            <p id="password-error" style="color:red; display:none;">
+            <p id="password-error" style="color: red; display: none;">
                 Password must be at least 8 characters.
             </p>
         </div>

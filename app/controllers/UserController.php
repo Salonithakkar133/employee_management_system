@@ -42,53 +42,69 @@ class UserController {
         include_once 'app/views/users/add.php';
     }
 
-    public function edit() {
-        $message = '';
-        $user_id = isset($_GET['id']) ? $_GET['id'] : null;
-        $user = $this->user->getUserById($user_id);
+  public function edit() {
+    $message = '';
+    $user_id = isset($_GET['id']) ? $_GET['id'] : null;
+    $user = $this->user->getUserById($user_id);
 
-        if ($_POST) {
-            $this->user->id = $_POST['user_id'];
-            $this->user->role = $_POST['role'];
+    if ($_POST) {
+        $this->user->id = $_POST['user_id'];
+        $this->user->role = $_POST['role'];
 
-            // Restrict team_leader from assigning admin role
-            if ($_SESSION['role'] === 'team_leader' && $_POST['role'] === 'admin') {
-                $message = "Team Leader cannot assign Admin role.";
+        // ✅ Prevent admin from changing their own role
+        if ($_SESSION['id'] == $_POST['user_id']) {
+            $message = "You cannot change your own role.";
+        }
+        // ✅ Prevent team_leader from assigning admin role
+        elseif ($_SESSION['role'] === 'team_leader' && $_POST['role'] === 'admin') {
+            $message = "Team Leader cannot assign Admin role.";
+        } else {
+            if ($this->user->updateRole($this->user->id, $this->user->role)) {
+                $message = "Role updated successfully.";
             } else {
-                if ($this->user->updateRole($this->user->id, $this->user->role)) {
-                    $message = "Role updated successfully.";
-                } else {
-                    $message = "Failed to update role.";
-                }
+                $message = "Failed to update role.";
             }
         }
-
-        include_once 'app/views/users/edit.php';
     }
 
-    public function update() {
-        $message = '';
-        $user_id = isset($_GET['id']) ? $_GET['id'] : null;
-        $user = $this->user->getUserById($user_id);
+    include 'app/views/users/edit.php';
+}
 
-        if ($_POST) {
-            $this->user->id = $_POST['id'];
-            $this->user->name = $_POST['name'];
-            $this->user->email = $_POST['email'];
-            $this->user->password = !empty($_POST['password']) ? $_POST['password'] : '';
-            $this->user->role = $_POST['role'];
 
-            $result = $this->user->update();
-            if ($result === true) {
-                $message = "User updated successfully.";
-            } elseif ($result === "Email is already registered") {
-                $message = "Email is already registered.";
-            } else {
-                $message = "Failed to update user.";
-            }
+   public function update() {
+    $message = '';
+    $user_id = isset($_GET['id']) ? $_GET['id'] : null;
+
+    // Get the role of the user being edited
+    $user = $this->user->getUserById($user_id);
+
+    // Block team leader from accessing admin user
+    if ($_SESSION['role'] === 'team_leader' && isset($user['role']) && $user['role'] === 'admin') {
+        // Optional: Redirect to users list with message
+        header("Location: index.php?page=users&message=" . urlencode("You are not allowed to edit an Admin user."));
+        exit;
+    }
+
+    // Handle update if allowed
+    if ($_POST) {
+        $this->user->id = $_POST['id'];
+        $this->user->name = $_POST['name'];
+        $this->user->email = $_POST['email'];
+        $this->user->password = !empty($_POST['password']) ? $_POST['password'] : '';
+        $this->user->role = $_POST['role'];
+
+        $result = $this->user->update();
+        if ($result === true) {
+            $message = "User updated successfully.";
+        } elseif ($result === "Email is already registered") {
+            $message = "Email is already registered.";
+        } else {
+            $message = "Failed to update user.";
         }
-        include_once 'app/views/users/update.php';
     }
+
+    include_once 'app/views/users/update.php';
+}
     public function profile() {
     session_start();
     $user_id = $_SESSION['id'];
@@ -110,8 +126,6 @@ class UserController {
 
     include_once 'app/views/users/profile.php';
 }
-
-
 
     public function delete() {
       

@@ -30,6 +30,15 @@
                 <?php endwhile; ?>
             </select>
         </div>
+        <div>
+            <label>Start Date:</label>
+            <input type="date" name="start_date" value="<?php echo isset($task['start_date']) ? $task['start_date'] : ''; ?>" required>
+        </div>
+        <div>
+            <label>End Date:</label>
+            <input type="date" name="end_date" value="<?php echo isset($task['end_date']) ? $task['end_date'] : ''; ?>" required>
+        </div>
+
         <button type="submit">Add Task</button>
     </form>
     <p><a href="index.php?page=tasks">Back to Tasks</a></p>

@@ -1,7 +1,7 @@
 <?php include 'app/views/template/header.php'; ?>
 <div class="container">
     <h2>Team Leader Dashboard</h2>
-    <p>Welcome, Team Leader! Manage tasks and view/update users below.</p>
+    <p>Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?>! View your assigned tasks below.</p>
     <h3>Task Management</h3>
     <ul>
         <li><a href="index.php?page=tasks">View All Tasks</a></li>

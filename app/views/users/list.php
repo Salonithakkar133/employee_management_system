@@ -6,6 +6,7 @@
         <p class="message"><?php echo htmlspecialchars($_GET['message']); ?></p>
     <?php endif; ?>
 
+    <?php if ($users->rowCount() > 0): ?>
     <table>
         <tr>
             <th>ID</th>
@@ -43,6 +44,9 @@
         </tr>
         <?php endwhile; ?>
     </table>
+    <?php else: ?>
+        <p>No users found.</p>
+    <?php endif; ?>
 
     <?php if ($_SESSION['role'] === 'admin'): ?>
         <p><a href="index.php?page=add_user">Add New User</a></p>

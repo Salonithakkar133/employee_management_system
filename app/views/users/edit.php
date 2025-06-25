@@ -24,7 +24,7 @@
                 <option value="pending" <?php echo $user['role'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
                 <option value="employee" <?php echo $user['role'] === 'employee' ? 'selected' : ''; ?>>Employee</option>
                 <option value="team_leader" <?php echo $user['role'] === 'team_leader' ? 'selected' : ''; ?>>Team Leader</option>
-                <option value="admin" <?php echo $user['role'] === 'admin' ? 'selected' : ''; ?>>Admin</option>
+               <option value="admin" <?= $user['role'] === 'admin' ? 'selected' : ''; ?>>Admin</option>
             </select>
         </div>
         <button type="submit">Update Role</button>

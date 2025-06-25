@@ -3,7 +3,7 @@
     <h2>Update User</h2>
     <?php if (!empty($message)): ?>
         <p class="<?php echo strpos($message, 'failed') !== false || strpos($message, 'already') !== false ? 'error' : 'message'; ?>">
-            <?php echo $message; ?>
+           <?php echo $message; ?>
         </p>
     <?php endif; ?>
     <form method="POST" action="index.php?page=update_user&id=<?php echo $user['id']; ?>">

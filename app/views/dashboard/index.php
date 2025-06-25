@@ -1,6 +1,7 @@
 <?php include 'app/views/template/header.php'; ?>
 <h2>Dashboard</h2>
 <p>Welcome, <?php echo $_SESSION['id']; ?>!</p>
+
 <h3>Your Tasks</h3>
 <table>
     <tr>

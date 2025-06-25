@@ -76,19 +76,18 @@ switch ($page) {
         if ($page === 'tasks') $taskController->list();
         elseif ($page === 'add_task') $taskController->add();
         elseif ($page === 'edit_task') $taskController->edit();
-        elseif ($page === 'delete_task') $taskController->delete();
+        elseif ($page === 'delete_task') $taskController->delete_task();
         break;
-     case 'profile':
-    session_start();
-    if (!isset($_SESSION['id'])) {
-        header("Location: index.php?page=login");
-        exit;
-    }
-
-    $user_id = $_SESSION['id'];
-    $user = $userController->getProfileData($user_id);  // ⬅️ fetch user data
-    include_once 'app/views/users/profile.php'; // ⬅️ render profile view
-    break;
+    case 'profile':
+        session_start();
+        if (!isset($_SESSION['id'])) {
+            header("Location: index.php?page=login");
+            exit;
+        }
+        $user_id = $_SESSION['id'];
+        $user = $userController->getProfileData($user_id);  //fetch user data
+        include_once 'app/views/users/profile.php'; // render profile view
+        break;
 
     case 'update_profile':
         session_start();
@@ -98,16 +97,32 @@ switch ($page) {
         }
         $userController->update_profile();
         break;
-        case 'restore_user':
-    session_start();
-    if (!isset($_SESSION['id']) || $_SESSION['role'] !== 'admin') {
-        header("Location: index.php?page=login");
-        exit;
-    }
-    $userController->restore();
-    break;
 
+    case 'restore_user':
+        session_start();
+            if (!isset($_SESSION['id']) || $_SESSION['role'] !== 'admin') {
+                header("Location: index.php?page=login");
+                exit;
+        }
+        $userController->restore();
+        break;
+    case 'restore_task':
+        session_start();
+        if (!isset($_SESSION['id']) || $_SESSION['role'] !== 'admin') {
+            header("Location: index.php?page=login");
+            exit;
+        }
+        require_once 'app/controllers/TaskController.php';
    
+        $task = new TaskController();
+        $task->restore_task();
+        break; 
+     
+    case 'view_task':
+        require_once 'app/controllers/TaskController.php';
+        $task = new TaskController();
+        $task->view();
+        break;
     default:
         $authController->login();
 }

@@ -8,10 +8,17 @@
         $userModel = new User($this->db);
         $users = $userModel->getAll();
         foreach ($users as $user) {
-            echo "<option value='{$user['id']}'>{$user['username']}</option>";
+            echo "<option value='{$user['id']}'>{$user['name']}</option>";
         }
         ?>
     </select>
+    <label for="start_date">Start Date:</label>
+    <input type="date" name="start_date" required>
+
+    <label for="end_date">End Date:</label>
+    <input type="date" name="end_date" required>
+
     <button type="submit">Create Task</button>
+   
 </form>
 <?php include 'app/views/template/footer.php'; ?>

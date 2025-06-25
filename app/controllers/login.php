@@ -5,9 +5,9 @@ class Login extends Controller {
         $this->view('app/auth/login');
     }
 
-    public function register() {
-        $this->view('app/auth/registration');
-    }
+    //public function register() {
+       // $this->view('app/auth/registration');
+    //}
 
     public function createUser() {
         require '../config/database.php';
@@ -37,6 +37,7 @@ class Login extends Controller {
     }
 
     public function auth() {
+        session_start();
         require '../config/database.php';
         $email = $_POST['email'];
         $pass = $_POST['password'];
@@ -46,7 +47,14 @@ class Login extends Controller {
         $user = $stmt->fetch();
 
         if ($user && password_verify($pass, $user['password'])) {
-            $_SESSION['user'] = $user;
+            
+        //$_SESSION['user'] = $user; 
+        //$_SESSION['id'] = $user['id']; 
+        //$_SESSION['name'] = $user['name'];
+        //$_SESSION['role'] = $user['role'];
+          $_SESSION['user'] = $user; // This line stores full user info
+         $_SESSION['id'] = $user['id'];
+        $_SESSION['role'] = $user['role'];  
             header("Location: " . BASE_URL . "/Dashboard");
         } else {
             $_SESSION['error'] = "Invalid email or password.";

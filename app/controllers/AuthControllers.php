@@ -21,7 +21,13 @@ class AuthController {
                 error_log("Stored hash: " . $user['password']);
                 $password_verify = password_verify(trim($_POST['password']), $user['password']);
                 error_log("Password verify: " . ($password_verify ? 'true' : 'false'));
+                error_log("Stored password from DB: " . $user['password']);
+error_log("Input password: " . trim($_POST['password']));
+
                 if ($password_verify) {
+                    error_log("Stored password from DB: " . $user['password']);
+error_log("Input password: " . trim($_POST['password']));
+
                     if ($user['role'] === 'pending') {
                         $error = "Your account is pending. Contact the admin to assign a role.";
                         error_log("Login failed: Pending role");
@@ -29,6 +35,7 @@ class AuthController {
                         session_start();
                         $_SESSION['id'] = $user['id'];
                         $_SESSION['role'] = $user['role'];
+                        $_SESSION['name'] = $user['name'];
                         error_log("Login successful: User ID = " . $user['id'] . ", Role = " . $user['role']);
                         header("Location: index.php?page=dashboard");
                         error_log("Redirect header sent");
@@ -50,34 +57,33 @@ class AuthController {
     }
 
     public function register() {
-        $error = '';
-        error_log("Entering register method");
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            error_log("POST data: " . print_r($_POST, true));
-            $this->user->name = trim($_POST['name']);
-            $this->user->email = trim($_POST['email']);
-            $this->user->password = password_hash(trim($_POST['password']), PASSWORD_DEFAULT);
-            $this->user->role = 'pending'; 
-            try {
-                if ($this->user->register()) {
-                    error_log("Registration successful: Email = " . $this->user->email);
-                     $message = "Registration successful. Please contact admin to assign a role.";
-                    include_once 'app/views/auth/registration.php';
-                    return;
-                    
-                    } 
-                     else {
-                    $error = "Registration failed. Email may already exist.";
-                    error_log("Registration failed: Email = " . $this->user->email);
-                }
-            } catch (Exception $e) {
-                $error = "Error: " . $e->getMessage();
-                error_log("Registration error: " . $e->getMessage());
+    $error = '';
+    $message = '';
+    error_log("Entering register method");
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        error_log("POST data: " . print_r($_POST, true));
+        $this->user->name = trim($_POST['name']);
+        $this->user->email = trim($_POST['email']);
+        $this->user->password = password_hash(trim($_POST['password']), PASSWORD_DEFAULT);
+        //error_log("Generated Hash: " . $this->user->password);
+        $this->user->role = 'pending'; 
+        try {
+            $result = $this->user->register();
+            if ($result === true) {
+                $message = "Registration successful. Please contact admin to assign a role.";
+                error_log("Registration successful: Email = " . $this->user->email);
+            } else {
+                $error = "Registration failed. Email may already exist.";
+                error_log("Registration failed: Email = " . $this->user->email);
             }
+        } catch (Exception $e) {
+            $error = "Error: " . $e->getMessage();
+            error_log("Registration error: " . $e->getMessage());
         }
-        error_log("Rendering register page with error: $error");
-        include_once 'app/views/auth/registration.php';
     }
+    error_log("Rendering register page with error: $error, message: $message");
+    include_once 'app/views/auth/registration.php';
+}
 
     public function logout() {
         session_start();

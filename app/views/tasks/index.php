@@ -1,26 +1,35 @@
+
+
+
 <?php include 'app/views/template/header.php'; ?>
-<h2>Tasks</h2>
-<table>
-    <tr>
-        <th>Title</th>
-        <th>Description</th>
-        <th>Status</th>
-        <th>Assigned To</th>
-        <?php if ($_SESSION['role_id'] != 1) echo '<th>Actions</th>'; ?>
-    </tr>
-    <?php foreach ($tasks as $task): ?>
-    <tr>
-        <td><?php echo $task['title']; ?></td>
-        <td><?php echo $task['description']; ?></td>
-        <td><?php echo $task['status']; ?></td>
-        <td><?php echo $task['assigned_to']; ?></td>
-        <?php if ($_SESSION['role_id'] != 1): ?>
-        <td>
-            <a href="index.php?controller=task&action=edit&id=<?php echo $task['id']; ?>">Edit</a>
-            <a href="index.php?controller=task&action=delete&id=<?php echo $task['id']; ?>" onclick="return confirm('Are you sure?')">Delete</a>
-        </td>
-        <?php endif; ?>
-    </tr>
-    <?php endforeach; ?>
-</table>
-<?php include 'app/views/template/footer.php'; ?>s
+<div class="container">
+    <h2>Task Management</h2>
+    <a href="index.php?page=add_task">Add New Task</a>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Assigned To</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($tasks as $task): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($task['id']); ?></td>
+                    <td><?php echo htmlspecialchars($task['title']); ?></td>
+                    <td><?php echo htmlspecialchars($task['assigned_to']); ?></td>
+                    <td><?php echo htmlspecialchars($task['status']); ?></td>
+                    <td>
+                        <a href="index.php?controller=task&action=edit&id=<?php echo $task['id']; ?>">Edit</a>
+                        <a href="index.php?page=view_task&id=<?php echo htmlspecialchars($task['id']); ?>">View</a>
+                        <a href="index.php?page=delete_task&id=<?php echo htmlspecialchars($task['id']); ?>">Delete</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+<?php include 'app/views/template/footer.php'; ?>

@@ -15,36 +15,54 @@ class User {
     }
 
     public function register() {
-        $query = "INSERT INTO " . $this->table_name . " SET name=:name, email=:email, password=:password, role=:role";
-        $stmt = $this->conn->prepare($query);
-        
-        $this->name = htmlspecialchars(strip_tags($this->name));
-        $this->email = htmlspecialchars(strip_tags($this->email));
-        $this->password = password_hash($this->password, PASSWORD_DEFAULT);
-        $this->role = 'pending';
+    $query = "INSERT INTO " . $this->table_name . " (name, email, password, role) VALUES (:name, :email, :password, :role)";
+    $stmt = $this->conn->prepare($query);
+    
+    $this->name = htmlspecialchars(strip_tags($this->name));
+    $this->email = htmlspecialchars(strip_tags($this->email));
+    $this->password = htmlspecialchars(strip_tags(string:$this->password));
+    $this->role = 'pending';
+    //echo($this->password);//do delete after wards
 
-        $stmt->bindParam(":name", $this->name);
-        $stmt->bindParam(":email", $this->email);
-        $stmt->bindParam(":password", $this->password);
-        $stmt->bindParam(":role", $this->role);
+    $stmt->bindParam(":name", $this->name);
+    $stmt->bindParam(":email", $this->email);
+    $stmt->bindParam(":password", $this->password);//i was doing here also hash
+    $stmt->bindParam(":role", $this->role);
 
-        try {
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            if ($e->getCode() == 23000) {
-                return "Email is already registered";
-            }
+    try {
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        if ($e->getCode() == 23000) { // Duplicate entry
             return false;
         }
+        return false; // Other errors
     }
+}
 
     public function login() {
         $query = "SELECT * FROM " . $this->table_name . " WHERE email = :email";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":email", $this->email);
         $stmt->execute();
+
+        //print_r( $stmt->fetch(PDO::FETCH_ASSOC));// to delete after words
+        
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function test() {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":email", $this->email);
+        $stmt->execute();
+
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+
+
+
 
     public function getAllUsers() {
     $query = "SELECT * FROM users";
@@ -53,7 +71,7 @@ class User {
     return $stmt;
 }    
 public function getUserById($id) {
-        $query = "SELECT id, name, email, role FROM " . $this->table_name . " WHERE id = :id";
+        $query = "SELECT id, name, email,role FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);
         $stmt->execute();
